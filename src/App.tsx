@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
+import React, { useReducer } from 'react';
+import './App.scss';
+import { FirstComponent } from './components/FirstComponent';
+import { Ctx } from "./Context";
+import { initialState, reducer } from "./globalState";
+import { StateInterface } from './globalTypes';
 function App() {
+  const [state, dispatch] = useReducer(reducer, initialState())
+  React.useEffect(() => {
+    try {
+      fetch('https://fakestoreapi.com/products')
+        .then(res => res.json())
+        .then(data => dispatch({ type: "ADD_INITIAL_ITEMS", payload: data }))
+    } catch (err) {
+      dispatch({ type: "ERROR" })
+    }
+  }, [])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <Ctx.Provider value={state}>
+      <FirstComponent state={state as StateInterface}
+        dispatch={dispatch}
+        ctx={Ctx} />
+    </Ctx.Provider>
+  )
 }
 
 export default App;
